@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Typography,
   Button,
@@ -12,12 +12,13 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  Card,
+  CardContent,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import SendIcon from "@mui/icons-material/Send";
+import DownloadIcon from "@mui/icons-material/Download";
 import { styled } from "@mui/material/styles";
-import Graph from "react-vis-network-graph";
-import * as rdflib from "rdflib";
 import axios from "axios";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
@@ -33,7 +34,6 @@ function App() {
   const [dataGraph, setDataGraph] = useState("");
   const [page, setPage] = useState(2);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [grafo, setGrafo] = useState(null);
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -84,42 +84,21 @@ function App() {
       });
   };
 
-  const graph = {
-    nodes: [
-      { id: 1, label: "1", title: "node 1 tootip text" },
-      { id: 2, label: "2", title: "node 2 tootip text" },
-      { id: 3, label: "3", title: "node 3 tootip text" },
-      { id: 4, label: "4", title: "node 4 tootip text" },
-      { id: 5, label: "5", title: "node 5 tootip text" },
-      { id: 6, label: "6", title: "node 6 tootip text" },
-    ],
-    edges: [
-      { from: 1, to: 2 },
-      { from: 1, to: 3 },
-      { from: 2, to: 4 },
-      { from: 2, to: 5 },
-      { from: 2, to: 6 },
-      { from: 6, to: 1 },
-      { from: 5, to: 6 },
-    ],
-  };
+  const Div = styled("div")(({ theme }) => ({
+    ...theme.typography.button,
+    backgroundColor: "#f3f3f3",
+    padding: theme.spacing(1),
+  }));
 
-  const options = {
-    layout: {
-      hierarchical: false,
-    },
-    edges: {
-      color: "red",
-    },
-    height: "500px",
-  };
-
-  const events = {
-    select: function (event) {
-      var { nodes, edges } = event;
-      console.log(edges);
-      console.log(nodes);
-    },
+  const handleDownloadJson = () => {
+    const element = document.createElement("a");
+    const file = new Blob([JSON.stringify(dataCleaned)], {
+      type: "text/plain",
+    });
+    element.href = URL.createObjectURL(file);
+    element.download = "data.json";
+    document.body.appendChild(element);
+    element.click();
   };
 
   return (
@@ -212,13 +191,13 @@ function App() {
                         )
                         .map((row, index) => (
                           <TableRow key={index}>
-                            <TableCell>{row.title}</TableCell>
-                            <TableCell>{row.description}</TableCell>
-                            <TableCell>{row.reach}</TableCell>
-                            <TableCell>{row.interactions}</TableCell>
-                            <TableCell>{row.shares}</TableCell>
-                            <TableCell>{row.likes}</TableCell>
-                            <TableCell>{row.comments}</TableCell>
+                            <TableCell>{row.Título}</TableCell>
+                            <TableCell>{row.Descripción}</TableCell>
+                            <TableCell>{row.PersonasAlcanzadas}</TableCell>
+                            <TableCell>{row.Interacciones}</TableCell>
+                            <TableCell>{row.VecesCompartido}</TableCell>
+                            <TableCell>{row.Likes}</TableCell>
+                            <TableCell>{row.Comentarios}</TableCell>
                           </TableRow>
                         ))}
                     </TableBody>
@@ -232,6 +211,14 @@ function App() {
                     rowsPerPage={rowsPerPage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                   />
+                  <Button
+                    variant="outlined"
+                    startIcon={<DownloadIcon />}
+                    onClick={handleDownloadJson}
+                    sx={{ my: 3, mx: 6 }}
+                  >
+                    Descargar JSON
+                  </Button>
                 </TableContainer>
               </Stack>
               <Divider />
@@ -245,7 +232,16 @@ function App() {
                 Visualización del grafo
               </Typography>
               <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                
+                <Typography variant="body1" gutterBottom>
+                  OWL resultante de la ontologia. Se puede tomar como base para
+                  la construccion de un grafo.
+                  <br />
+                  <Card sx={{ minWidth: 275 }}>
+                    <CardContent>
+                      <Div>{dataGraph}</Div>
+                    </CardContent>
+                  </Card>
+                </Typography>
               </Stack>
               <Divider />
             </div>
